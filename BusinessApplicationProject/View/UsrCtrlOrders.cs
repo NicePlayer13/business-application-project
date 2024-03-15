@@ -27,7 +27,43 @@ namespace BusinessApplicationProject.View
         #region Search
         private void CmdSearchCustomers_Click(object sender, EventArgs e)
         {
-            //Search Results with not empty filters
+            var filter = CreateFilterFunction();
+
+            List<Order> orders = new List<Order>();
+            orders = orderController.Find(filter);
+
+            if(orders.Count > 0)
+            {
+                LblGridViewOrdersNoResults.Visible = false;
+
+                DataGridViewOrdersResults.ClearSelection();
+                DataGridViewOrdersResults.DataSource = null;
+                DataGridViewOrdersResults.Columns.Clear();
+                DataGridViewOrdersResults.AutoGenerateColumns = false;
+
+                DataGridViewTextBoxColumn orderNumberColumn = new DataGridViewTextBoxColumn
+                {
+                    Name = "orderNumberColumn",
+                    HeaderText = "Order Number",
+                    DataPropertyName = "OrderNumber"
+                };
+
+                DataGridViewTextBoxColumn orderDateColumn = new DataGridViewTextBoxColumn
+                {
+                    Name = "orderDateColumn",
+                    HeaderText = "Order Date",
+                    DataPropertyName = "Date"
+                };
+
+                DataGridViewOrdersResults.Columns.Add(orderNumberColumn);
+                DataGridViewOrdersResults.Columns.Add(orderDateColumn);
+
+                DataGridViewOrdersResults.DataSource = orders;
+            }
+            else
+            {
+                LblGridViewOrdersNoResults.Visible = true;
+            }
         }
 
         private void CmdResetSearchFilters_Click(object sender, EventArgs e)
