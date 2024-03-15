@@ -1,4 +1,6 @@
-﻿using BusinessApplicationProject.Model;
+﻿using BusinessApplicationProject.Controller;
+using BusinessApplicationProject.Model;
+using BusinessApplicationProject.Repository;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -30,6 +32,11 @@ namespace BusinessApplicationProject.View
 
         private void CmdResetSearchFilters_Click(object sender, EventArgs e)
         {
+            ResetAllFilters();
+        }
+
+        private void ResetAllFilters()
+        {
             //Reset Filters
             TxtSearchCustomerNumber.Text = string.Empty;
             TxtSearchCustomerFirstName.Text = string.Empty;
@@ -41,82 +48,82 @@ namespace BusinessApplicationProject.View
             DatSearchOrdersUntil.Value = DatSearchOrdersUntil.MaxDate;
         }
 
-        /*
-        private TemporalController<Article> articleController = new TemporalController<Article>
+        
+        private Controller<Order> orderController = new Controller<Order>
         {
             getContext = () => new AppDbContext(),
-            getRepository = context => new TemporalRepository<Article>(context)
+            getRepository = context => new Repository<Order>(context)
         };
 
         public void UpdateSearchResults()
         {
-            DataGridViewInvoices.AutoGenerateColumns = false;
-            LblNoResults.Visible = false;
-            DataGridViewInvoices.DataSource = null;
-            DataGridViewInvoices.Columns.Clear();
+            DataGridViewOrdersResults.AutoGenerateColumns = false;
+            LblGridViewOrdersNoResults.Visible = false;
+            DataGridViewOrdersResults.DataSource = null;
+            DataGridViewOrdersResults.Columns.Clear();
 
             try
             {
-                List<Invoice> invoices = [];
+                List<Order> orders = [];
                 var filter = CreateFilterFunction();
-                invoices = invoiceController.Find(filter);
+                orders = orderController.Find(filter);
 
-                if (invoices.Count > 0)
+                if (orders.Count > 0)
                 {
-                    DataGridViewTextBoxColumn invoiceNumberColumn = new DataGridViewTextBoxColumn
+                    DataGridViewTextBoxColumn orderNumberColumn = new DataGridViewTextBoxColumn
                     {
-                        Name = "invoiceNumberColumn",
-                        HeaderText = "Invoice Number",
-                        DataPropertyName = "InvoiceNumber"
+                        Name = "orderNumberColumn",
+                        HeaderText = "Order Number",
+                        DataPropertyName = "OrderNumber"
                     };
 
-                    DataGridViewTextBoxColumn dueDateColumn = new DataGridViewTextBoxColumn
+                    DataGridViewTextBoxColumn dateColumn = new DataGridViewTextBoxColumn
                     {
-                        Name = "dueDateColumn",
-                        HeaderText = "Due Date",
-                        DataPropertyName = "DueDate"
+                        Name = "DateColumn",
+                        HeaderText = "Date",
+                        DataPropertyName = "Date"
                     };
 
-                    DataGridViewTextBoxColumn paymentStatusColumn = new DataGridViewTextBoxColumn
+                    DataGridViewTextBoxColumn customerNumberColumn = new DataGridViewTextBoxColumn
                     {
-                        Name = "paymentStatusColumn",
-                        HeaderText = "Payment Status",
-                        DataPropertyName = "PaymentStatus"
+                        Name = "customerNumberColumn",
+                        HeaderText = "Customer Number",
+                        DataPropertyName = "CustomerNumber"
                     };
 
-                    DataGridViewTextBoxColumn paymentMethodColumn = new DataGridViewTextBoxColumn
+                    DataGridViewTextBoxColumn customerFirstNameColumn = new DataGridViewTextBoxColumn
                     {
-                        Name = "paymentMethodColumn",
-                        HeaderText = "Payment Method",
-                        DataPropertyName = "PaymentMethod"
+                        Name = "customerFirstNameColumn",
+                        HeaderText = "Customer First Name",
+                        DataPropertyName = "CustomerFirstName"
                     };
 
-                    DataGridViewTextBoxColumn discountColumn = new DataGridViewTextBoxColumn
+                    DataGridViewTextBoxColumn customerLastNameColumn = new DataGridViewTextBoxColumn
                     {
-                        Name = "discountColumn",
-                        HeaderText = "Discount",
-                        DataPropertyName = "Discount"
+                        Name = "customerLastNameColumn",
+                        HeaderText = "Customer Last Name",
+                        DataPropertyName = "CustomerLastName"
                     };
 
-                    DataGridViewTextBoxColumn taxPercentageColumn = new DataGridViewTextBoxColumn
+                    DataGridViewTextBoxColumn positionNumberColumn = new DataGridViewTextBoxColumn
                     {
-                        Name = "taxPercentageColumn",
-                        HeaderText = "Tax Percentage",
-                        DataPropertyName = "TaxPercentage"
+                        Name = "positionNumberColumn",
+                        HeaderText = "Position Number",
+                        DataPropertyName = "PositionNumber"
                     };
 
-                    DataGridViewInvoices.Columns.Add(invoiceNumberColumn);
-                    DataGridViewInvoices.Columns.Add(dueDateColumn);
-                    DataGridViewInvoices.Columns.Add(paymentStatusColumn);
-                    DataGridViewInvoices.Columns.Add(paymentMethodColumn);
-                    DataGridViewInvoices.Columns.Add(discountColumn);
-                    DataGridViewInvoices.Columns.Add(taxPercentageColumn);
+                    DataGridViewOrdersResults.Columns.Add(orderNumberColumn);
+                    DataGridViewOrdersResults.Columns.Add(customerNumberColumn);
+                    DataGridViewOrdersResults.Columns.Add(customerFirstNameColumn);
+                    DataGridViewOrdersResults.Columns.Add(customerLastNameColumn);
+                    DataGridViewOrdersResults.Columns.Add(positionNumberColumn);
+                    DataGridViewOrdersResults.Columns.Add(dateColumn);
 
-                    DataGridViewInvoices.DataSource = invoices;
+                    DataGridViewOrdersResults.DataSource = orders;
                 }
                 else
                 {
-                    LblNoResults.Visible = true;
+                    LblGridViewOrdersNoResults.Visible = true;
                 }
             }
             catch (TimeoutException)
@@ -129,21 +136,14 @@ namespace BusinessApplicationProject.View
             }
         }
 
-        private Expression<Func<Invoice, bool>> CreateFilterFunction()
+        private Expression<Func<Order, bool>> CreateFilterFunction()
         {
-            return invoice =>
-                (string.IsNullOrEmpty(TxtSearchInvoiceNumber.Text) || invoice.InvoiceNumber.Contains(TxtSearchInvoiceNumber.Text)) &&
-                (string.IsNullOrEmpty(TxtSearchCustomerNumber.Text) || invoice.OrderInformations.CustomerDetails.CustomerNumber.Contains(TxtSearchCustomerNumber.Text)) &&
-                (string.IsNullOrEmpty(TxtSearchOrderNumber.Text) || invoice.OrderInformations.OrderNumber.Contains(TxtSearchOrderNumber.Text)) &&
-                (string.IsNullOrEmpty(TxtSearchFirstName.Text) || invoice.OrderInformations.CustomerDetails.FirstName.Contains(TxtSearchFirstName.Text)) &&
-                (string.IsNullOrEmpty(TxtSearchLastName.Text) || invoice.OrderInformations.CustomerDetails.LastName.Contains(TxtSearchLastName.Text)) &&
-                (string.IsNullOrEmpty(TxtStreetAddress.Text) || invoice.BillingAddress.StreetAddress.Contains(TxtStreetAddress.Text)) &&
-                (string.IsNullOrEmpty(TxtSearchZipCode.Text) || invoice.BillingAddress.ZipCode.Contains(TxtSearchZipCode.Text)) &&
-                (string.IsNullOrEmpty(TxtSearchCountry.Text) || invoice.BillingAddress.Country.Contains(TxtSearchCountry.Text)) &&
-                (DatPckInvoiceDateFrom.Value == DatPckInvoiceDateFrom.MinDate || invoice.OrderInformations.Date >= DatPckInvoiceDateFrom.Value) &&
-                (DatPckInvoiceDateTo.Value == DatPckInvoiceDateTo.MaxDate || invoice.OrderInformations.Date <= DatPckInvoiceDateTo.Value);
+            return order =>
+                (string.IsNullOrEmpty(TxtSearchCustomerNumber.Text) || order.CustomerDetails.CustomerNumber.Contains(TxtSearchCustomerNumber.Text)) &&
+                (string.IsNullOrEmpty(TxtSearchCustomerFirstName.Text) || order.CustomerDetails.FirstName.Contains(TxtSearchCustomerFirstName.Text)) &&
+                (string.IsNullOrEmpty(TxtSearchCustomerLastName.Text) || order.CustomerDetails.LastName.Contains(TxtSearchCustomerLastName.Text));
         }
-        */
+        
 
         #endregion
 
@@ -152,7 +152,9 @@ namespace BusinessApplicationProject.View
 
         private void CmdShowAllOrders_Click(object sender, EventArgs e)
         {
+            ResetAllFilters();
             //Load all Orders into Grid
+            UpdateSearchResults();
         }
 
         private void CmdEditSelectedOrder_Click(object sender, EventArgs e)
@@ -195,10 +197,14 @@ namespace BusinessApplicationProject.View
         #region Positions
         private void CmdOpenSelectedPosition_Click(object sender, EventArgs e)
         {
+            //check if only one Position is selected
+            if(DataGridViewOrderPositions.SelectedCells.Count != 1)
+            {
+                return;
+            }
+            //Show information of position
             GrpInformationSelectedPosition.Visible = true;
 
-            //check if only one Position is selected
-            //
         }
 
         private void CmdAddNewPosition_Click(object sender, EventArgs e)
@@ -208,7 +214,7 @@ namespace BusinessApplicationProject.View
             //create new PositionID
 
             //Empty all values
-            CmbInputArticle.Select();
+            CmbInputArticle.Text = string.Empty;
             TxtInputOrderPositionArticleQuantity.Text = string.Empty;
         }
 
@@ -233,7 +239,7 @@ namespace BusinessApplicationProject.View
                 MessageBox.Show("Select a valid Article");
 
             }
-            else if (isNumeric && number >= 1 && number <= 100)
+            else if (isNumeric && number >= 1 && number <= 1000)
             {
                 //Throw warning
                 if (WarningUpdatedObject())

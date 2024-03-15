@@ -177,7 +177,7 @@ namespace BusinessApplicationProject.View
 
         private void CmdCopyCustomerNumber_Click(object sender, EventArgs e)
         {
-            var selection = GetSelectedItem<Invoice>(DataGridViewInvoices);
+            var selection = Utils.GetSelectedItem<Invoice>(DataGridViewInvoices);
 
             if (selection != null)
             {
@@ -193,7 +193,7 @@ namespace BusinessApplicationProject.View
 
         private void CmdCopyOrderNumber_Click(object sender, EventArgs e)
         {
-            var selection = GetSelectedItem<Invoice>(DataGridViewInvoices);
+            var selection = Utils.GetSelectedItem<Invoice>(DataGridViewInvoices);
 
             if (selection != null)
             {
@@ -470,7 +470,7 @@ namespace BusinessApplicationProject.View
 
         private void CmdCopyArticleNumber_Click(object sender, EventArgs e)
         {
-            object? selection = GetSelectedItem<object>(DataGridViewOrderPositions);
+            object? selection = Utils.GetSelectedItem<object>(DataGridViewOrderPositions);
 
             if (selection != null)
             {
@@ -669,22 +669,6 @@ namespace BusinessApplicationProject.View
             }
 
             CmdEditDelete.Enabled = true;
-        }
-
-        // Could potentially be outsourced into a service class
-        private T? GetSelectedItem<T>(DataGridView dataGridView) where T : class?
-        {
-            if (dataGridView.DataSource != null)
-            {
-                List<T> dataGridContent = (List<T>)dataGridView.DataSource;
-
-                if (dataGridView.SelectedCells.Count > 0)
-                {
-                    return dataGridContent[dataGridView.SelectedCells[0].RowIndex];
-                }
-            }
-
-            return null;
         }
     }
 }
